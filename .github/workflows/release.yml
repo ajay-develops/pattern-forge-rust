@@ -43,8 +43,12 @@ jobs:
       - name: Package binary (linux-amd64)
         run: |
           chmod +x target/release/patterns
-          tar -czf patterns-linux-amd64.tar.gz -C target/release patterns
-          ls -lh patterns-linux-amd64.tar.gz
+          VERSION="${GITHUB_REF_NAME:-dev}"
+          ARCHIVE="patterns-${VERSION}-linux-amd64.tar.gz"
+          tar -czf "$ARCHIVE" -C target/release patterns
+          ls -lh "$ARCHIVE"
+        env:
+          GITHUB_REF_NAME: ${{ github.ref_name }}
 
       - name: Upload artifact (linux-amd64)
         uses: actions/upload-artifact@v4
@@ -52,7 +56,7 @@ jobs:
           name: patterns-linux-amd64
           path: |
             target/release/patterns
-            patterns-linux-amd64.tar.gz
+            patterns-${{ github.ref_name || 'dev' }}-linux-amd64.tar.gz
 
       - name: Create GitHub Release
         if: startsWith(github.ref, 'refs/tags/')
@@ -60,7 +64,7 @@ jobs:
         with:
           files: |
             target/release/patterns
-            patterns-linux-amd64.tar.gz
+            patterns-${{ github.ref_name }}-linux-amd64.tar.gz
           tag_name: ${{ github.ref_name }}
           name: Release ${{ github.ref_name }}
           generate_release_notes: true
