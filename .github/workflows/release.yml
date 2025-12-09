@@ -35,17 +35,26 @@ jobs:
       - name: Build
         run: cargo build --release
 
+      - name: Package binary (linux-amd64)
+        run: |
+          chmod +x target/release/patterns
+          tar -czf patterns-linux-amd64.tar.gz -C target/release patterns
+
       - name: Upload artifact (linux-amd64)
         uses: actions/upload-artifact@v4
         with:
           name: patterns-linux-amd64
-          path: target/release/patterns
+          path: |
+            target/release/patterns
+            patterns-linux-amd64.tar.gz
 
       - name: Create GitHub Release
         if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2
         with:
-          files: target/release/patterns
+          files: |
+            target/release/patterns
+            patterns-linux-amd64.tar.gz
           generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
