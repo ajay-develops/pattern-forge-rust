@@ -35,10 +35,16 @@ jobs:
       - name: Build
         run: cargo build --release
 
+      - name: Verify binary exists
+        run: |
+          ls -lh target/release/patterns
+          file target/release/patterns
+
       - name: Package binary (linux-amd64)
         run: |
           chmod +x target/release/patterns
           tar -czf patterns-linux-amd64.tar.gz -C target/release patterns
+          ls -lh patterns-linux-amd64.tar.gz
 
       - name: Upload artifact (linux-amd64)
         uses: actions/upload-artifact@v4
@@ -55,6 +61,8 @@ jobs:
           files: |
             target/release/patterns
             patterns-linux-amd64.tar.gz
+          tag_name: ${{ github.ref_name }}
+          name: Release ${{ github.ref_name }}
           generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
